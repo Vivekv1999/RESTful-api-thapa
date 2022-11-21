@@ -1,32 +1,56 @@
-// const express = require('express');
-// const MensRanking = require('../models/mens')    
+const express = require('express');
+const MensRanking = require('../models/mens')
+const router = new express.Router();
 
-// const router = new express.Router();
+const multer = require("multer")
+const path = require("path");
+
+const storage = multer.diskStorage({
+    destination: "./upload/images",
+    filename: (req, file, cb) => {
+        return cb(null, `${file.fieldname}_${Date.now()}${path.extname(file.originalname)}`)
+    }
+})
+const upload = multer({
+    storage: storage
+})
+
+
 
 // //we will handle post req
-// router.post('/mens', async (req, res) => {
-//     try {
-//         const addingMenRecord = new MensRanking(req.body)
-//         console.log(req.body);
+router.post('/mens', upload.single('profile'), async (req, res) => {
+    console.log(req.file)
+    try {
+        const addingMenRecord = new MensRanking(
+            {name: req.body.name, 
+            ranking: req.body.ranking,
+            dob: req.body.dob,
+            country: req.body.country,
+            score: req.body.score
+            // image: req.file.path
+        }
+            // req.body
+        )
+        console.log(req.body,"rightttttttttttt");
 
-//         const inserMens = await addingMenRecord.save()
-//         res.status(201).send(inserMens)
-//     } catch (e) {
-//         res.status(400).send(e)
-//     }
-// })
+        const inserMens = await addingMenRecord.save()
+        res.status(201).send(inserMens)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
 
 // //we will handle get req-----read data
 // ////////find({})---->.sort({"ranking" :1})  ------>ranking na adhar esort thay jase
-// router.get('/mens', async (req, res) => {
-//     try {
-//         const getMen = await MensRanking.find({}).sort({ "ranking": 1 })
-//         console.log(getMen);
-//         res.status(201).send(getMen)
-//     } catch (e) {
-//         res.status(400).send(e)
-//     }
-// })
+router.get('/mens', async (req, res) => {
+    try {
+        const getMen = await MensRanking.find({}).sort({ "ranking": 1 })
+        console.log(getMen);
+        res.status(201).send(getMen)
+    } catch (e) {
+        res.status(400).send(e)
+    }
+})
 
 // // get individual data 
 // router.get('/mens/:id', async (req, res) => {
@@ -64,4 +88,5 @@
 //     }
 // })
 
-// module.exports = router
+
+module.exports = router
